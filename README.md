@@ -92,7 +92,39 @@ We have to check if the request is valid for the currently logged in user.
   ```
 ## Issue 4: A6-Sensitive Data Exposure
 
+Currently, the application does not protect the password, which is sensitive data, in any way.
+Using any tool to detect http traffic you can easily find out the password you are using for logging in.
+In this 
+
 ### Steps to reproduce:
+
+1. Open Fiddler
+2. If you are logged in in the web application, log out by pressing `Logout!`.
+3. Log in again.
+4. Fiddler should now have logged your request.
+_NOTE: Fiddler may be unable to log your requests to localhost:8080. In this case, you can user for example either
+`http://localhost:.8080` or `http://{yourmachinename}:8080`._
+5. In Fiddler, go to `Inspectors`-tab.
+6. Then, go to `WebForms`-tab.
+7. You should be able to see your username and password in plain text.
+
+### Where the flaw comes from:
+
+The connection is not secure, because it uses HTTP instead of HTTPS, which means that the information that
+is moving between the sender and the receiver is not encrypted.
+
+### How to fix it:
+
+To fix this, we need to create a `Self-Signed Certificate` and make some adjustments to the code.
+You can find the instructions [here](https://drissamri.be/blog/java/enable-https-in-spring-boot/).
+
+To make things a little bit easier, the code from the link is already included in the project.
+Just uncomment the contents of sec.project.config.`HTTPSRedirectionConfiguration.java` and src/main/resources/`application.properties`.
+
+Copy the self-signed certificate to the project root folder and modify the `mypassword` of `server.ssl.key-store-password: mypassword` from `application.properties` to contain the password of the certificate.
+
+Now you only need to add a new security exception in your browser for the certificate. If you don't know how to do this
+for your current browser, you can find the instructions easily using the search engine of your choice.
 
 ## Issue 5: A8-Cross-Site Request Forgery (CSRF)
 

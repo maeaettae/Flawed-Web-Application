@@ -118,8 +118,18 @@ is moving between the sender and the receiver is not encrypted.
 To fix this, we need to create a `Self-Signed Certificate` and make some adjustments to the code.
 You can find the instructions [here](https://drissamri.be/blog/java/enable-https-in-spring-boot/).
 
-To make things a little bit easier, the code from the link is already included in the project.
-Just uncomment the contents of sec.project.config.`HTTPSRedirectionConfiguration.java` and src/main/resources/`application.properties`.
+To make things a little bit easier, the code for the java class from the link is already included in the project.
+Just uncomment the contents of sec.project.config.`HTTPSRedirectionConfiguration.java`.
+
+Then, as is suggested in the link, create a file, `application.properties`, which contains the following:
+  ```
+  server.port: 8443
+  server.ssl.key-store: keystore.p12
+  server.ssl.key-store-password: mypassword
+  server.ssl.keyStoreType: PKCS12
+  server.ssl.keyAlias: tomcat
+  ```
+and paste it to either the root folder of the project or to `src/main/resources/`.
 
 Copy the self-signed certificate to the project root folder and modify the `mypassword` of `server.ssl.key-store-password: mypassword` from `application.properties` to contain the password of the certificate.
 

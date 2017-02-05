@@ -15,15 +15,7 @@ Then, connect to `http://localhost:8080`. You should be redirected to `http://lo
 Go to account registration page by pressing the topmost button `Click here!`. Enter a new username and password and click `Register!`. Go back to the login page by pressing `Go!`. Now you should be able to log in using your newly created account.
 After succesful login, you should redirected to the startup page `http://localhost:8080/form`, and be seeing a page for signing up to the greatest event of 2018.
 
-## Issue 1: A2-Broken Authentication and Session Management
-
-### Steps to reproduce:
-
-
-2. 
-
-
-## Issue 2: A3-Cross-Site Scripting (XSS)
+## Issue 1: A3-Cross-Site Scripting (XSS)
 
 ### Steps to reproduce:
 
@@ -65,7 +57,7 @@ using thymeleaf instead of javascript, by replacing the code above with:
   ```
 th:text escapes the text, which can and in this case will contain malicious javascript code.
   
-## Issue 3: A4-Insecure Direct Object References
+## Issue 2: A4-Insecure Direct Object References
 
 ### Steps to reproduce:
 
@@ -99,7 +91,7 @@ We have to check if the request is valid for the currently logged in user.
         return "signups";
     }
   ```
-## Issue 4: A6-Sensitive Data Exposure
+## Issue 3: A6-Sensitive Data Exposure
 
 Currently, the application does not protect the password, which is sensitive data, in any way.
 Using any tool to detect http traffic you can easily find out the password you are using for logging in.
@@ -145,7 +137,7 @@ Copy the self-signed certificate to the project root folder and modify the `mypa
 Now you only need to add a new security exception in your browser for the certificate. If you don't know how to do this
 for your current browser, you can find the instructions easily using the search engine of your choice.
 
-## Issue 5: A8-Cross-Site Request Forgery (CSRF)
+## Issue 4: A8-Cross-Site Request Forgery (CSRF)
 
 ### Steps to reproduce:
 
@@ -203,3 +195,74 @@ To fix it, remove
  in `form.html` and `signups.html`.
  
  Now, a CSRF token is sent every time you log out, preventing the malicious ad from working.
+ 
+## Issue 5: A2-Broken Authentication and Session Management
+
+### Explanation:
+
+Another major flaw can be found when looking at the source code. User credentials are stored to a database, but they are
+never encrypted. This means that sensitive data (i.e. passwords) can be fetched from the database in plain text, which in turn means that that information could be compromised in unfortunate circumstances.
+
+### Where the flaw comes from:
+
+The following function can be found in `RegistrationController.java`. It creates new accounts from registration credentials. 
+Look at the code after the checks.
+```java
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public String submitRegistration(@RequestParam String newUsername, @RequestParam String newPassword, Model model) {
+        //checks if the username already exists
+        if (accountRepository.findByUsername(newUsername)!=null) {
+            model.addAttribute("registrationError", true);
+            return "register";
+        }
+        //checks if the strings are empty
+        if (newUsername.isEmpty() || newPassword.isEmpty()) {
+            model.addAttribute("lengthError", true);
+            return "register";
+        }
+        //checks if there are any spaces in the strings
+        if (newUsername.matches(".*  *.*") || newPassword.matches(".*  *.*")) {
+            model.addAttribute("spaceError", true);
+            return "register";
+        }
+        Account acc = new Account(newUsername, newPassword);
+        accountRepository.save(acc);
+        model.addAttribute("done", true);
+        return "register";
+    }
+```
+### How to fix it:
+
+Encrypt every password before storing them to a database, for example by using `BCryptPasswordEncoder` which is included in
+the Spring framework.
+
+Replace the end of the code above with the following:
+```java
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        newPassword = passwordEncoder.encode(newPassword);
+        Account acc = new Account(newUsername, newPassword);
+        accountRepository.save(acc);
+        model.addAttribute("done", true);
+        return "register";
+```
+
+In addition, paste this to `SecurityConfiguration.java`:
+```java
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.userDetailsService(userDetailsService).passwordEncoder(passwordEncoder());
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
+```
+That should configure the AuthenticationManagerBuilder to tell Spring to use BCryptPasswordEncoder 
+to compare the passwords.
+
+## Important:
+
+This list contains only the 5 most important flaws I intentionally produced from OWASP 2013 Top 10 List.
+This list of flaws is by no means exhaustive. There still exists several flaws, even some of which I am not aware of.
+For example, you can access the registration keys of the current and past years, if you fiddle with the sign-up-form source code.

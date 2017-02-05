@@ -148,3 +148,58 @@ for your current browser, you can find the instructions easily using the search 
 ## Issue 5: A8-Cross-Site Request Forgery (CSRF)
 
 ### Steps to reproduce:
+
+1. Login with your username and password.
+2. Go to the project root folder.
+3. Open `maliciousAd.html`.
+4. Go back to the website and reload.
+5. Now you should be logged out.
+
+### Where the flaw comes from:
+
+In this case the ad wasn't that malicous after all: it merely logged you out. However in some cases this could be really harmful,
+as this is not the only way to use CSRF.
+
+The flaw comes from the security configuration, which disables CSRF protection in the following way using `csrf.disable()`:
+```java
+  @Override
+  protected void configure(HttpSecurity http) throws Exception {
+      http
+          .authorizeRequests()                
+              .antMatchers("/register").permitAll()
+              .anyRequest().authenticated()
+              .and()
+          .formLogin()
+              .loginPage("/login").permitAll()
+              .and()
+          .logout()
+              .permitAll()
+              .and()
+          .csrf()
+              .disable();
+  }
+```
+### How to fix it:
+
+To fix it, remove
+ ```java
+      .csrf()
+          .disable();
+ ```
+ 
+ Now, to enable logging out, we need to replace 
+ ```html
+        <form action="#" th:action="@{/logout}" method="GET">
+            <p><input type="submit" value="Logout!" /></p>
+        </form>
+ ```
+ with
+ ```html
+        <form action="#" th:action="@{/logout}" method="POST">
+            <input type="hidden" name="${_csrf.parameterName}" value="${_csrf.token}"/>
+            <p><input type="submit" value="Logout!" /></p>
+        </form>
+ ```
+ in `form.html` and `signups.html`.
+ 
+ Now, a CSRF token is sent every time you log out, preventing the malicious ad from working.

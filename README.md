@@ -36,26 +36,35 @@ After succesful login, you should redirected to the startup page `http://localho
   And click Submit
 3. A popup with message "XSS" should now appear on the page that lists you registrations.
 
-### Steps to reproduce using ZAP:
+### Where the flaw comes from:
 
-1. Open the application
-2. Enter `http://localhost:8080` as `URL to attack`, and click `Attack`.
-3. The application lists every page that is currently accessible to `Sites`-drop-down list.
-4. From there, select `http://localhost:8080`, and choose `Include in Context` -> `New Context`.
-5. Select `Authentication` and choose `Form-based Authentication` from the drop-down list.
-6. Select `http://localhost:8080/login` for the `Form Target URL`.
-7. Login `Request POST Data` should be automatically filled. If not, copy `username=ZAP&password=ZAP` to the field.
-8. Change `Password Parameter` to `password`.
-9. Now select `Users` from the left. Click `Add`.
-10. Type anything as a `User Name`. Type your new login credentials to the fields below and click `Add`.
-11. Click `OK`.
-12. Choose `Tools` -> `Spider...`.
-13. Select `http://localhost:8080/` for `Starting point`.
-14. Choose the newly created context and user from the drop-down lists below.
-15. Click `Start Scan`.
+The vulnerability comes from the following lines of code, which can be found in signups.html:
+  ```html
+    <div th:if="${success}">
+      <p>Thank you! Succesfully registered as <span id="name"></span>, from <span id="address"></span></p>
+      <script th:inline="javascript">
+      /*<![CDATA[*/
+        var name = [[${name}]];
+        var address = [[${address}]];
+            
+        document.getElementById("name").innerHTML =  name;
+        document.getElementById("address").innerHTML = address;
+       /*]]>*/
+      </script>
+    </div>
+  ```
+### How to fix it:
+  
+In the code above, name and address can contain any unvalidated, user-provided data. The easiest way to fix it may be
+using thymeleaf instead of javascript, by replacing the code above with:
 
-
-
+  ```html
+    <div th:if="${success}">
+      <p>Thank you! Succesfully registered as <span th:text="${name}"></span>, from <span th:text="${address}"></span></p>
+    </div>
+  ```
+th:text escapes the text, which can and in this case will contain malicious javascript code.
+  
 ## Issue 3: A4-Insecure Direct Object References
 
 ### Steps to reproduce:

@@ -95,7 +95,7 @@ We have to check if the request is valid for the currently logged in user.
 
 Currently, the application does not protect the password, which is sensitive data, in any way.
 Using any tool to detect http traffic you can easily find out the password you are using for logging in.
-In this 
+I am using Fiddler for reproducing the issue.
 
 ### Steps to reproduce:
 
@@ -105,9 +105,10 @@ In this
 4. Fiddler should now have logged your request.
 _NOTE: Fiddler may be unable to log your requests to localhost:8080. In this case, you can user for example either
 `http://localhost:.8080` or `http://{yourmachinename}:8080`._
-5. In Fiddler, go to `Inspectors`-tab.
-6. Then, go to `WebForms`-tab.
-7. You should be able to see your username and password in plain text.
+5. In Fiddler, choose the newly appeared POST-request
+6. Go to `Inspectors`-tab.
+7. Then, go to `WebForms`-tab.
+8. You should be able to see your username and password in plain text.
 
 ### Where the flaw comes from:
 

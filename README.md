@@ -60,6 +60,36 @@ After succesful login, you should redirected to the startup page `http://localho
 
 ### Steps to reproduce:
 
+1. Login with you new account.
+2. Go to `http://localhost:8080/signups/admin`.
+3. You can now see sign-ups of another user that do not belong to you.
+
+### Where the flaw comes from:
+
+This is the code that controls access to the signups:
+
+  ```java
+    @RequestMapping(value = "/signups/{user}", method = RequestMethod.GET)
+    public String checkSignup(@PathVariable String user, Model model) {
+        List<Signup> signups = accountRepository.findByUsername(user).getSignups();
+        model.addAttribute("signups", signups);
+        return "signups";
+    }
+  ```
+### How to fix it:
+
+We have to check if the request is valid for the currently logged in user.
+  ```java
+    @RequestMapping(value = "/signups/{user}", method = RequestMethod.GET)
+    public String checkSignup(Authentication auth, @PathVariable String user, Model model) {
+        //FIXED: if user parameter does not belong to the currently logged in user, redirect to /form
+        if (accountRepository.findByUsername(auth.getName()) != accountRepository.findByUsername(user))
+            return "redirect:/form";
+        List<Signup> signups = accountRepository.findByUsername(user).getSignups();
+        model.addAttribute("signups", signups);
+        return "signups";
+    }
+  ```
 ## Issue 4: A6-Sensitive Data Exposure
 
 ### Steps to reproduce:

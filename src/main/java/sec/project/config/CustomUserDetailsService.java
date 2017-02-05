@@ -7,6 +7,7 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import sec.project.domain.Account;
 import sec.project.domain.Signup;
@@ -24,7 +25,9 @@ public class CustomUserDetailsService implements UserDetailsService {
 
     @PostConstruct
     public void init() {
-        Account admin = new Account("admin", "admin");
+        BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+        String hashedPassword = passwordEncoder.encode("admin");
+        Account admin = new Account("admin", hashedPassword);
         accountRepository.save(admin);
         Signup sgn = new Signup("Grizzly", "Bearhouse 15, Bearforest 1548", 2014, admin);
         signupRepository.save(sgn);

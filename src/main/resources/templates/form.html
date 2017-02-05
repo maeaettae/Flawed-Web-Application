@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Sign up form</title>
+    </head>
+    <body>
+        
+        <h3>Sorry! It's too late to sign up for the gretest event of 2017.</h3> 
+        <h1>However, you can sign up to the greatest event of 2018 using this form!</h1>
+
+        <form action="#" th:action="@{/signups/{username}(username=${username})}" method="POST">
+            <p><label for="name">Name</label>: <input type="text" name="name" id="name"/></p>
+            <p><label for="address">Address</label>: <input type="text" name="address" id="address"/></p>
+            <input type="hidden" name="year" value="2017"/>
+            <p><input type="submit" value="Submit" /></p>
+        </form>
+
+        <p>(A special registration key for the event will be provided after your registration.)</p>
+        
+        <form action="#" th:action="@{/logout}" method="GET">
+            <p><input type="submit" value="Logout!" /></p>
+        </form>
+        
+    </body>
+</html>

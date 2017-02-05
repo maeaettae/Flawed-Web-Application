@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+
+    <head>
+        <title>You have been signed to these events!</title>
+    </head>
+    <body>
+        
+        <h1>You have been signed up for these awesome events!</h1>
+        <div th:if="${success}">
+            <p>Thank you! Succesfully registered as <span id="name"></span>, from <span id="address"></span></p>
+                <script th:inline="javascript">
+                /*<![CDATA[*/
+                    var name = [[${name}]];
+                    var address = [[${address}]];
+            
+                    document.getElementById("name").innerHTML =  name;
+                    document.getElementById("address").innerHTML = address;
+                /*]]>*/
+                </script>
+        </div>
+        <ul>
+            <li th:each="signup: ${signups}">
+                <span th:text="${signup.toString()}"></span>
+            </li>
+        </ul>
+        
+        <form action="#" th:action="@{/logout}" method="GET">
+            <p><input type="submit" value="Logout!" /></p>
+        </form>
+    </body>
+</html>

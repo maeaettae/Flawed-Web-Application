@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<!--
+To change this license header, choose License Headers in Project Properties.
+To change this template file, choose Tools | Templates
+and open the template in the editor.
+-->
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title tiles:fragment="title">Log in!</title>
+    </head>
+    <body>
+        <div>
+            <form name="r" th:action="@{/register}" method="GET">
+                <label for="register">No account?</label>
+                <input type="submit" id="register" value="Click here!"/>
+            </form>
+        </div>
+            
+        <div tiles:fragment="content">
+            <form name="f" th:action="@{/login}" method="POST">
+                <h1>Please Login</h1>
+                    <div th:if="${param.error}" class ="alert alert-error">
+                        Invalid username or password.
+                    </div>
+                    <div th:if="${param.logout}" class ="alert alert-success">
+                        You have been logged out.
+                    </div>
+                    <p><label for="username">Username:</label>
+                        <input type="text" id="username" name="username"/></p>
+                    <p><label for="password">Password:</label>
+                        <input type="password" id="password" name ="password"/></p>
+                    <div class="form-actions">
+                        <button type="submit" class="btn">Login!</button>
+                    </div>
+            </form>
+        </div>
+        
+        
+    </body>
+        
+</html>

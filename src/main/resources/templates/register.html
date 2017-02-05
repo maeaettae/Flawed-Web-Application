@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="http://www.thymeleaf.org">
+    <head>
+        <title>Register!</title>
+    </head>
+    <body>
+
+        <div>
+            <form name="r" th:action="@{/register}" method="POST">
+                <h1>Use this form to register an account.</h1>
+                    <div th:if="${registrationError}">
+                        Username already in use.
+                    </div>
+                    <div th:if="${lengthError}">
+                        Username and password must contain at least 1 character.
+                    </div>
+                    <div th:if="${spaceError}">
+                        Username and password must not contain spaces.
+                    </div>
+                    <div th:if="${done}">
+                        Account created!
+                    </div>
+                    <p><label for="newUsername">Username:</label>
+                        <input type="text" id="newUsername" name="newUsername"/></p>
+                    <p><label for="newPassword">Password:</label>
+                        <input type="password" id="newPassword" name ="newPassword"/></p>
+                    <div>
+                        <button type="submit">Register!</button>
+                    </div>
+            </form>
+        </div>
+        
+        <div>
+        <form action="#" th:action="@{/login}" method="GET">
+            
+            <p>Back to login page:  <input type="submit" value="Go!" /></p>
+        </form>
+        </div>
+            
+    </body>
+</html>
